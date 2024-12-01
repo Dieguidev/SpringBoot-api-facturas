@@ -1,5 +1,6 @@
-package com.dieguidev.api_gestion_facturas.jwt;
+package com.dieguidev.api_gestion_facturas.security.jwt;
 
+import com.dieguidev.api_gestion_facturas.security.CustomerDetailsService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

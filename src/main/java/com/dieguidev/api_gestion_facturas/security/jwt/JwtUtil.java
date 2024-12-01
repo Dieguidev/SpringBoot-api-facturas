@@ -1,4 +1,4 @@
-package com.dieguidev.api_gestion_facturas.jwt;
+package com.dieguidev.api_gestion_facturas.security.jwt;
 
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.core.userdetails.UserDetails;

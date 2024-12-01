@@ -1,4 +1,4 @@
-package com.dieguidev.api_gestion_facturas.jwt;
+package com.dieguidev.api_gestion_facturas.security;
 
 import com.dieguidev.api_gestion_facturas.dao.UserDAO;
 import com.dieguidev.api_gestion_facturas.pojo.User;
