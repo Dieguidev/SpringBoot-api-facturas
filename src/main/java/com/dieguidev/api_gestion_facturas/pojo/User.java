@@ -5,14 +5,20 @@ import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.io.Serializable;
+
 @NamedQuery(name = "User.findByEmail", query = "SELECT u FROM User u WHERE u.email = :email")
+@NamedQuery(name = "User.getAllUsers", query = "SELECT new com.dieguidev.api_gestion_facturas.wrapper.UserWrapper(u.id, u.nombre, u.email, u.numeroContacto, u.status) FROM User u WHERE u.role='user'")
 
 @Data
 @Entity
 @DynamicUpdate
 @DynamicInsert
 @Table(name = "users")
-public class User {
+public class User implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

@@ -1,16 +1,17 @@
 package com.dieguidev.api_gestion_facturas.rest;
 
 import com.dieguidev.api_gestion_facturas.constantes.FacturaConstantes;
+import com.dieguidev.api_gestion_facturas.security.jwt.JwtUtil;
 import com.dieguidev.api_gestion_facturas.service.UserService;
 import com.dieguidev.api_gestion_facturas.util.FacturaUtils;
+import com.dieguidev.api_gestion_facturas.wrapper.UserWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,6 +20,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtUtil authenticationService;
 
     @PostMapping("/signup")
     public ResponseEntity<String> registerUser(@RequestBody Map<String, String> requestMap) {
@@ -38,5 +42,29 @@ public class UserController {
             e.printStackTrace();
         }
         return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserWrapper>> findAllUsers() {
+        System.out.println("Finding all users");
+//        try {
+//            System.out.println("Finding all users");
+            return userService.getAllUsers();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return new ResponseEntity<List<UserWrapper>>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @GetMapping("/alli")
+    public ResponseEntity<List<UserWrapper>> pruebaUsers() {
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("validate-token")
+    public ResponseEntity<String> validate(@RequestParam String jwt) {
+        System.out.println("Validating token");
+        String isTokenValid = authenticationService.validateTokenV2(jwt);
+        return ResponseEntity.ok(isTokenValid);
     }
 }

@@ -2,6 +2,7 @@ package com.dieguidev.api_gestion_facturas.security;
 
 import com.dieguidev.api_gestion_facturas.dao.UserDAO;
 import com.dieguidev.api_gestion_facturas.pojo.User;
+import com.dieguidev.api_gestion_facturas.security.jwt.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,6 +21,9 @@ public class CustomerDetailsService implements UserDetailsService {
     @Autowired
     private UserDAO userDAO;
 
+    @Autowired
+    private JwtUtil jwtService;
+
 
     private User userDetail;
 
@@ -37,5 +41,15 @@ public class CustomerDetailsService implements UserDetailsService {
 
     public User getUserDetail() {
         return userDetail;
+    }
+
+    public boolean validateToken(String jwt) {
+        try {
+            jwtService.extractUsername(jwt);
+            return true;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
     }
 }
