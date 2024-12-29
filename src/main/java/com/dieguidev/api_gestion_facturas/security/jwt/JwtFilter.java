@@ -71,7 +71,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
     //verifica si el usuario es admin
     public Boolean isAdmin() {
-        System.out.println("role "+ claims.get("role"));
         return "admin".equalsIgnoreCase((String) claims.get("role"));
     }
 

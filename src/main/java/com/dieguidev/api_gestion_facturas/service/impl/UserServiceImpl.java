@@ -96,14 +96,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<List<UserWrapper>> getAllUsers() {
-        System.out.println("Dentro de getAllUsers");
         try {
-            System.out.println("Dentro de getAllUsers");
             if(jwtFilter.isAdmin()) {
-                System.out.println("Es admin");
                 return new ResponseEntity<>(userDAO.getAllUsers(), HttpStatus.OK);
             } else {
-                System.out.println("No es admin");
                 return new ResponseEntity<>(new ArrayList<>(), HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
@@ -111,11 +107,6 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
         }
         return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @Override
-    public ResponseEntity<List<UserWrapper>> getAllUsersV2() {
-        return new ResponseEntity<>(userDAO.getAllUsers(), HttpStatus.OK);
     }
 
     private boolean validateSignUpMap(Map<String, String> requestMap) {

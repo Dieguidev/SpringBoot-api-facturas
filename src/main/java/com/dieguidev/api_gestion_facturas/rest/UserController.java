@@ -46,20 +46,14 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<UserWrapper>> findAllUsers() {
-        System.out.println("Finding all users");
-//        try {
-//            System.out.println("Finding all users");
+        try {
             return userService.getAllUsers();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return new ResponseEntity<List<UserWrapper>>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<List<UserWrapper>>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @GetMapping("/alli")
-    public ResponseEntity<List<UserWrapper>> pruebaUsers() {
-        return userService.getAllUsers();
-    }
 
     @GetMapping("validate-token")
     public ResponseEntity<String> validate(@RequestParam String jwt) {
