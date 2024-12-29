@@ -5,4 +5,6 @@ public class FacturaConstantes {
 
     public static final String INVALID_DAT = "Datos inválidos";
 
+    public static final String UNAUTHORIZED_ACCESS = "No estas autorizado";
+
 }

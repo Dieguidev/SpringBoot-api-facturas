@@ -54,6 +54,16 @@ public class UserController {
         return new ResponseEntity<List<UserWrapper>>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @PutMapping("/update")
+    public ResponseEntity<String> updateStatus(@RequestBody Map<String, String> requestMap) {
+        try {
+            return userService.update(requestMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 
     @GetMapping("validate-token")
     public ResponseEntity<String> validate(@RequestParam String jwt) {

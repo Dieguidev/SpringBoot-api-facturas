@@ -22,10 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -107,6 +104,26 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
         }
         return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<String> update(Map<String, String> requestMap) {
+        try {
+            if (jwtFilter.isAdmin()) {
+                Optional<User> optionalUser = userDAO.findById(Integer.parseInt(requestMap.get("id")));
+                if (!optionalUser.isEmpty()) {
+                    userDAO.updateStatus(requestMap.get("status"), Integer.parseInt(requestMap.get("id")));
+                    return FacturaUtils.getResponseentity("Status del usuario actualizado", HttpStatus.OK);
+                } else {
+                    return FacturaUtils.getResponseentity("Este usuario no existe", HttpStatus.NOT_FOUND);
+                }
+            } else {
+                return FacturaUtils.getResponseentity(FacturaConstantes.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private boolean validateSignUpMap(Map<String, String> requestMap) {
