@@ -7,6 +7,7 @@ import com.dieguidev.api_gestion_facturas.security.CustomerDetailsService;
 import com.dieguidev.api_gestion_facturas.security.jwt.JwtFilter;
 import com.dieguidev.api_gestion_facturas.security.jwt.JwtUtil;
 import com.dieguidev.api_gestion_facturas.service.UserService;
+import com.dieguidev.api_gestion_facturas.util.EmailUtils;
 import com.dieguidev.api_gestion_facturas.util.FacturaUtils;
 import com.dieguidev.api_gestion_facturas.wrapper.UserWrapper;
 import io.jsonwebtoken.Claims;
@@ -45,6 +46,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailUtils emailUtils;
 
     @Override
     public ResponseEntity<String> singUp(Map<String, String> requestMap) {
@@ -113,6 +117,7 @@ public class UserServiceImpl implements UserService {
                 Optional<User> optionalUser = userDAO.findById(Integer.parseInt(requestMap.get("id")));
                 if (!optionalUser.isEmpty()) {
                     userDAO.updateStatus(requestMap.get("status"), Integer.parseInt(requestMap.get("id")));
+                    sendEmailToAdmins(requestMap.get("status"), optionalUser.get().getEmail(), userDAO.getAllAdmins());
                     return FacturaUtils.getResponseentity("Status del usuario actualizado", HttpStatus.OK);
                 } else {
                     return FacturaUtils.getResponseentity("Este usuario no existe", HttpStatus.NOT_FOUND);
@@ -124,6 +129,24 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
         }
         return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private void sendEmailToAdmins(String status, String user, List<String> allAdmins) {
+        // esta linea elimina el usurio actual para que no le envie correo
+        System.out.println(allAdmins);
+        allAdmins.remove(jwtFilter.getCurrentUser());
+        System.out.println(allAdmins);
+        System.out.println(jwtFilter.getCurrentUser());
+        // solo si status es true
+        //enviar correo a todos los admins
+
+
+
+        if (status != null && status.equalsIgnoreCase("true")){
+            emailUtils.senSimpleMessage(jwtFilter.getCurrentUser(), "Cuenta aprobada", "USUARIO : " + user + "\n es aporbado por \nADMIN : " + jwtFilter.getCurrentUser(), allAdmins);
+        } else {
+            emailUtils.senSimpleMessage(jwtFilter.getCurrentUser(), "Cuenta desaprobada", "USUARIO : " + user + "\n es desaporbado por \nADMIN : " + jwtFilter.getCurrentUser(), allAdmins);
+        }
     }
 
     private boolean validateSignUpMap(Map<String, String> requestMap) {

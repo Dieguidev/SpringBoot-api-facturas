@@ -44,7 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = authorizationHeader.split(" ")[1];
 
-        String username = jwtUtil.extractUsername(token);
+        username = jwtUtil.extractUsername(token);
         claims = jwtUtil.extractAllClaims(token);
 
         UserDetails userDetails = customerDetailsService.loadUserByUsername(username);
@@ -81,6 +81,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     //obtiene el usuario actual
     public String getCurrentUser() {
+
         return username;
     }
 }
