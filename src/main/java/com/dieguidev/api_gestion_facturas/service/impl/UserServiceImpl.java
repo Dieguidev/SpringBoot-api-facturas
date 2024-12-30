@@ -10,8 +10,8 @@ import com.dieguidev.api_gestion_facturas.service.UserService;
 import com.dieguidev.api_gestion_facturas.util.EmailUtils;
 import com.dieguidev.api_gestion_facturas.util.FacturaUtils;
 import com.dieguidev.api_gestion_facturas.wrapper.UserWrapper;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+
+import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,16 +155,30 @@ public class UserServiceImpl implements UserService {
         return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    //este metodo es para enviar por correo cuando se olvide la contraseña,
+    //pero debido a que en DB la contraseña esta hasheada
+    //mejor es enviarle una contraseña temporal y almacenarla en DB
+    @Override
+    public ResponseEntity<String> forgotPassword(Map<String, String> requestMap) {
+        try {
+            User user = userDAO.findByEmail(requestMap.get("email"));
+
+            if (!Objects.isNull(user) && !Strings.isNullOrEmpty(user.getEmail())) {
+                emailUtils.forgotPasswordEmail(user.getEmail(), "Credenciales del sistema gestión de facturas", user.getPassword());
+            }
+
+            return FacturaUtils.getResponseentity("Verifica tus credenciales", HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     private void sendEmailToAdmins(String status, String user, List<String> allAdmins) {
         // esta linea elimina el usurio actual para que no le envie correo
-        System.out.println(allAdmins);
         allAdmins.remove(jwtFilter.getCurrentUser());
-        System.out.println(allAdmins);
-        System.out.println(jwtFilter.getCurrentUser());
         // solo si status es true
         //enviar correo a todos los admins
-
-
         if (status != null && status.equalsIgnoreCase("true")) {
             emailUtils.senSimpleMessage(jwtFilter.getCurrentUser(), "Cuenta aprobada", "USUARIO : " + user + "\n es aporbado por \nADMIN : " + jwtFilter.getCurrentUser(), allAdmins);
         } else {
