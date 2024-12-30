@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<List<UserWrapper>> getAllUsers() {
         try {
-            if(jwtFilter.isAdmin()) {
+            if (jwtFilter.isAdmin()) {
                 return new ResponseEntity<>(userDAO.getAllUsers(), HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(new ArrayList<>(), HttpStatus.UNAUTHORIZED);
@@ -125,7 +125,31 @@ public class UserServiceImpl implements UserService {
             } else {
                 return FacturaUtils.getResponseentity(FacturaConstantes.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<String> checkToken() {
+        return FacturaUtils.getResponseentity("true", HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<String> changePassword(Map<String, String> requestMap) {
+        try {
+            User user = userDAO.findByEmail(jwtFilter.getCurrentUser());
+            if (!user.equals(null)) {
+                if (passwordEncoder.matches(requestMap.get("oldPassword"), user.getPassword())) {
+                    user.setPassword(passwordEncoder.encode(requestMap.get("newPassword")));
+                    userDAO.save(user);
+                    return FacturaUtils.getResponseentity("Contraseña actualizada con exito", HttpStatus.OK);
+                }
+                return FacturaUtils.getResponseentity("Contraseña incorrecta", HttpStatus.BAD_REQUEST);
+            }
+            return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -141,8 +165,7 @@ public class UserServiceImpl implements UserService {
         //enviar correo a todos los admins
 
 
-
-        if (status != null && status.equalsIgnoreCase("true")){
+        if (status != null && status.equalsIgnoreCase("true")) {
             emailUtils.senSimpleMessage(jwtFilter.getCurrentUser(), "Cuenta aprobada", "USUARIO : " + user + "\n es aporbado por \nADMIN : " + jwtFilter.getCurrentUser(), allAdmins);
         } else {
             emailUtils.senSimpleMessage(jwtFilter.getCurrentUser(), "Cuenta desaprobada", "USUARIO : " + user + "\n es desaporbado por \nADMIN : " + jwtFilter.getCurrentUser(), allAdmins);
