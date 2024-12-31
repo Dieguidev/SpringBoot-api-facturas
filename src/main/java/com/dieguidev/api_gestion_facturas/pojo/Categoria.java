@@ -9,6 +9,7 @@ import org.hibernate.annotations.DynamicUpdate;
 @NamedQuery(name = "Categoria.getAllCategories", query = "SELECT c FROM Categoria c")
 
 
+
 @Data
 @Entity
 @DynamicUpdate
