@@ -3,7 +3,6 @@ package com.dieguidev.api_gestion_facturas.service.impl;
 import com.dieguidev.api_gestion_facturas.constantes.FacturaConstantes;
 import com.dieguidev.api_gestion_facturas.dao.CategoriaDAO;
 import com.dieguidev.api_gestion_facturas.pojo.Categoria;
-import com.dieguidev.api_gestion_facturas.pojo.User;
 import com.dieguidev.api_gestion_facturas.security.jwt.JwtFilter;
 import com.dieguidev.api_gestion_facturas.service.CategoriaService;
 import com.dieguidev.api_gestion_facturas.util.FacturaUtils;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,8 +62,31 @@ public class CategoriaServiceImpl implements CategoriaService {
         return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @Override
+    public ResponseEntity<String> updateCategory(Map<String, String> requestMap) {
+        try {
+            if (jwtFilter.isAdmin()) {
+                if (validateCategoryMap(requestMap, true)) {
+                    Optional categoryInDB = categoriaDAO.findById(Integer.parseInt(requestMap.get("id")));
+                    System.out.println(categoryInDB);
+                    if (!categoryInDB.isEmpty()) {
+                        categoriaDAO.save(getCategoryFromMap(requestMap, true));
+                        return FacturaUtils.getResponseentity("Categoria actualizada con éxito", HttpStatus.OK);
+                    } else {
+                        return FacturaUtils.getResponseentity("La cetgoria con ese Id no existe", HttpStatus.NOT_FOUND);
+                    }
+                }
+            } else {
+                return FacturaUtils.getResponseentity(FacturaConstantes.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     private boolean validateCategoryMap(Map<String, String> requestMap, boolean validateId) {
-        if (requestMap.containsKey("nombre") && validateId) {
+        if (requestMap.containsKey("name") && validateId) {
             return true;
         }
         if (!validateId) {

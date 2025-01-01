@@ -10,4 +10,6 @@ public interface CategoriaService {
     ResponseEntity<String> addCategory(Map<String, String> requestMap);
 
     ResponseEntity<List<Categoria>> getAllCategories(String valueFilter);
+
+    ResponseEntity<String> updateCategory(Map<String, String> requestMap);
 }
