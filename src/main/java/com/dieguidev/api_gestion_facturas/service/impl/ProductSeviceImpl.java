@@ -7,11 +7,14 @@ import com.dieguidev.api_gestion_facturas.pojo.Product;
 import com.dieguidev.api_gestion_facturas.security.jwt.JwtFilter;
 import com.dieguidev.api_gestion_facturas.service.ProductService;
 import com.dieguidev.api_gestion_facturas.util.FacturaUtils;
+import com.dieguidev.api_gestion_facturas.wrapper.ProductWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -39,6 +42,30 @@ public class ProductSeviceImpl implements ProductService {
             e.printStackTrace();
         }
         return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<List<ProductWrapper>> getAllProducts() {
+        try {
+            if (jwtFilter.isAdmin()) {
+                List<ProductWrapper> products = productDAO.findAll().stream().map(product -> {
+                    ProductWrapper productWrapper = new ProductWrapper();
+                    productWrapper.setId(product.getId());
+                    productWrapper.setNombre(product.getNombre());
+                    productWrapper.setDescription(product.getDescription());
+                    productWrapper.setPrice(product.getPrice());
+                    productWrapper.setCategoryId(product.getCategoria().getId());
+                    productWrapper.setCategoryName(product.getCategoria().getNombre());
+                    return productWrapper;
+                }).toList();
+                return new ResponseEntity<>(products,HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(new ArrayList<>(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private Product getProductFromMap(Map<String, String> requestMap, boolean isAdd){
