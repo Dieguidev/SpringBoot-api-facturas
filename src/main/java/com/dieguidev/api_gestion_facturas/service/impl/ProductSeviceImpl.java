@@ -118,6 +118,32 @@ public class ProductSeviceImpl implements ProductService {
         return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @Override
+    public ResponseEntity<String> activateProduct(String productId) {
+        try {
+            if (jwtFilter.isAdmin()) {
+
+                Optional<Product> productDB = productDAO.findById(Integer.parseInt(productId));
+                if (productDB.isPresent() && "true".equalsIgnoreCase(productDB.get().getStatus())) {
+                    return FacturaUtils.getResponseentity("Producto ya se encuentra activado", HttpStatus.BAD_REQUEST);
+                }
+                if (productDB.isPresent()) {
+                    productDB.get().setStatus("true");
+                    productDAO.save(productDB.get());
+                    return FacturaUtils.getResponseentity("Producto activado con éxito", HttpStatus.OK);
+                } else {
+                    return FacturaUtils.getResponseentity("El producto con ese Id no existe", HttpStatus.NOT_FOUND);
+                }
+
+            } else {
+                return FacturaUtils.getResponseentity(FacturaConstantes.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     private Product getProductFromMap(Map<String, String> requestMap, boolean isAdd) {
         Categoria categoria = new Categoria();
         categoria.setId(Integer.parseInt(requestMap.get("categoryId")));

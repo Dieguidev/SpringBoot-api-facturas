@@ -59,4 +59,14 @@ public class ProductController {
         }
         return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @PostMapping("/activate/{productId}")
+    public ResponseEntity<String> activateProduct(@PathVariable String productId) {
+        try {
+            return productService.activateProduct(productId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

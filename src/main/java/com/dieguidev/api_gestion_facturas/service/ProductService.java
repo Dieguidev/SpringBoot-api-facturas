@@ -17,4 +17,6 @@ public interface ProductService {
     ResponseEntity<String> updateProduct(Map<String, String> requestMap);
 
     ResponseEntity<String> deleteProduct(String productId);
+
+    ResponseEntity<String> activateProduct(String productId);
 }
