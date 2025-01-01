@@ -1,8 +1,6 @@
 package com.dieguidev.api_gestion_facturas.rest;
 
 import com.dieguidev.api_gestion_facturas.constantes.FacturaConstantes;
-import com.dieguidev.api_gestion_facturas.pojo.Categoria;
-import com.dieguidev.api_gestion_facturas.pojo.Product;
 import com.dieguidev.api_gestion_facturas.service.ProductService;
 import com.dieguidev.api_gestion_facturas.util.FacturaUtils;
 import com.dieguidev.api_gestion_facturas.wrapper.ProductWrapper;
@@ -23,7 +21,7 @@ public class ProductController {
     private ProductService productService;
 
     @PostMapping
-    public ResponseEntity<String> addProduct(@RequestBody(required = true) Map<String, String> requestMap){
+    public ResponseEntity<String> addProduct(@RequestBody(required = true) Map<String, String> requestMap) {
         try {
             return productService.addProduct(requestMap);
         } catch (Exception e) {
@@ -39,6 +37,26 @@ public class ProductController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new ResponseEntity<List<ProductWrapper>>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<List<ProductWrapper>>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @PutMapping
+    public ResponseEntity<String> updateCategory(@RequestBody(required = true) Map<String, String> requestMap) {
+        try {
+            return productService.updateProduct(requestMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<String> deleteProduct(@PathVariable String productId) {
+        try {
+            return productService.deleteProduct(productId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

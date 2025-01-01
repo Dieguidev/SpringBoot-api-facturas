@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class ProductSeviceImpl implements ProductService {
@@ -58,7 +59,7 @@ public class ProductSeviceImpl implements ProductService {
                     productWrapper.setCategoryName(product.getCategoria().getNombre());
                     return productWrapper;
                 }).toList();
-                return new ResponseEntity<>(products,HttpStatus.OK);
+                return new ResponseEntity<>(products, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(new ArrayList<>(), HttpStatus.UNAUTHORIZED);
             }
@@ -68,12 +69,61 @@ public class ProductSeviceImpl implements ProductService {
         return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private Product getProductFromMap(Map<String, String> requestMap, boolean isAdd){
+    @Override
+    public ResponseEntity<String> updateProduct(Map<String, String> requestMap) {
+        try {
+            if (jwtFilter.isAdmin()) {
+                if (validateProductMap(requestMap, true)) {
+                    Optional<Product> productDB = productDAO.findById(Integer.parseInt(requestMap.get("id")));
+                    System.out.println(productDB);
+                    if (!productDB.isEmpty()) {
+                        Product product = getProductFromMap(requestMap, true);
+                        product.setStatus(productDB.get().getStatus());
+                        productDAO.save(product);
+                        return FacturaUtils.getResponseentity("Producto actualizada con éxito", HttpStatus.OK);
+                    } else {
+                        return FacturaUtils.getResponseentity("El producto con ese Id no existe", HttpStatus.NOT_FOUND);
+                    }
+                }
+            } else {
+                return FacturaUtils.getResponseentity(FacturaConstantes.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<String> deleteProduct(String productId) {
+        try {
+            if (jwtFilter.isAdmin()) {
+
+                Optional<Product> productDB = productDAO.findById(Integer.parseInt(productId));
+
+                if (productDB.isPresent() && "true".equalsIgnoreCase(productDB.get().getStatus())) {
+                    productDB.get().setStatus("false");
+                    productDAO.save(productDB.get());
+                    return FacturaUtils.getResponseentity("Producto eliminado con éxito", HttpStatus.OK);
+                } else {
+                    return FacturaUtils.getResponseentity("El producto con ese Id no existe", HttpStatus.NOT_FOUND);
+                }
+
+            } else {
+                return FacturaUtils.getResponseentity(FacturaConstantes.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private Product getProductFromMap(Map<String, String> requestMap, boolean isAdd) {
         Categoria categoria = new Categoria();
         categoria.setId(Integer.parseInt(requestMap.get("categoryId")));
 
         Product product = new Product();
-        if (isAdd){
+        if (isAdd) {
             product.setId(Integer.parseInt(requestMap.get("id")));
         } else {
             product.setStatus("true");
@@ -82,11 +132,12 @@ public class ProductSeviceImpl implements ProductService {
         product.setNombre(requestMap.get("name"));
         product.setDescription(requestMap.get("description"));
         product.setPrice(Integer.parseInt(requestMap.get("price")));
+
         return product;
     }
 
-    private boolean validateProductMap(Map<String, String> requestMap, boolean validateId){
-        if(requestMap.containsKey("name")) {
+    private boolean validateProductMap(Map<String, String> requestMap, boolean validateId) {
+        if (requestMap.containsKey("name")) {
             if (requestMap.containsKey("id") && validateId) {
                 return true;
             }
