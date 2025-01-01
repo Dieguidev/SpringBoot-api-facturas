@@ -31,14 +31,19 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductWrapper>> getCategories() {
+    public ResponseEntity<List<ProductWrapper>> getProducts(@RequestParam(required = false) String query) {
         try {
-            return productService.getAllProducts();
+            if (query == null || query.isEmpty()){
+                return productService.getAllProducts();
+            }
+            return productService.getAllProducts2();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return new ResponseEntity<List<ProductWrapper>>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+
 
     @PutMapping
     public ResponseEntity<String> updateCategory(@RequestBody(required = true) Map<String, String> requestMap) {
@@ -69,4 +74,26 @@ public class ProductController {
         }
         return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @GetMapping("/productsByCategory/{categoryId}")
+    public ResponseEntity<List<ProductWrapper>> productsByCategory(@PathVariable String categoryId) {
+        try {
+            return productService.productsByCategory(categoryId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<List<ProductWrapper>>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductWrapper> getProductById(@PathVariable String id) {
+        try {
+            return productService.getProductById(Integer.parseInt(id) );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<ProductWrapper>(new ProductWrapper(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
 }

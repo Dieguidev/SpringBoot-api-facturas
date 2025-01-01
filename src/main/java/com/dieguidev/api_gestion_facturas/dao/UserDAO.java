@@ -1,6 +1,7 @@
 package com.dieguidev.api_gestion_facturas.dao;
 
 import com.dieguidev.api_gestion_facturas.pojo.User;
+import com.dieguidev.api_gestion_facturas.wrapper.ProductWrapper;
 import com.dieguidev.api_gestion_facturas.wrapper.UserWrapper;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -20,4 +21,6 @@ public interface UserDAO extends JpaRepository<User, Integer> {
     @Transactional
     @Modifying
     Integer updateStatus(@Param("status") String status, @Param("id") Integer id);
+
+
 }

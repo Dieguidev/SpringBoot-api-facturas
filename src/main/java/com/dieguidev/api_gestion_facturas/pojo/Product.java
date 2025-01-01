@@ -1,9 +1,15 @@
 package com.dieguidev.api_gestion_facturas.pojo;
 
+
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+
+@NamedQuery(name = "Product.getAllProducts", query = "SELECT new com.dieguidev.api_gestion_facturas.wrapper.ProductWrapper(" +
+        "p.id, p.nombre, p.description, p.price, p.status, p.categoria.id, p.categoria.nombre) FROM Product p")
+@NamedQuery(name = "Product.getProductById", query = "SELECT new com.dieguidev.api_gestion_facturas.wrapper.ProductWrapper(p.id, p.nombre, p.description, p.price) " +
+        "FROM Product p WHERE p.id=:id")
 
 @Data
 @Entity
