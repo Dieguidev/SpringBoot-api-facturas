@@ -7,4 +7,5 @@ public class FacturaConstantes {
 
     public static final String UNAUTHORIZED_ACCESS = "No estas autorizado";
 
+    public static final String STORE_LOCATION = "A:\\PROJECTS\\JAVA\\udmCurs\\Proyecto05";
 }
