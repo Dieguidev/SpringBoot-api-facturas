@@ -1,17 +1,23 @@
 package com.dieguidev.api_gestion_facturas.service.impl;
 
+import com.dieguidev.api_gestion_facturas.constantes.FacturaConstantes;
 import com.dieguidev.api_gestion_facturas.dao.FacturaDAO;
 import com.dieguidev.api_gestion_facturas.pojo.Factura;
 import com.dieguidev.api_gestion_facturas.security.jwt.JwtFilter;
 import com.dieguidev.api_gestion_facturas.service.FacturaService;
+import com.dieguidev.api_gestion_facturas.util.FacturaUtils;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.FileOutputStream;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -30,11 +36,51 @@ public class FacturaServiceImpl implements FacturaService {
         log.info("dentro del metodo generar reporte");
         try {
             String fileName;
-            return null;
+            if(validateRequestMap(requestMap)){
+                if(requestMap.containsKey("isGenerate") && !(Boolean)requestMap.get("isGenerate")){
+                    fileName = (String) requestMap.get("uuid");
+                } else {
+                    fileName = FacturaUtils.getUUID();
+                    requestMap.put("uuid", fileName);
+                    insertInvoice(requestMap);
+                }
+
+                String data = "Nombre : " + requestMap.get("name") + "\nNumero de contacto : " + requestMap.get("contactNumber") +
+                    "\n" + "Email : " + requestMap.get("email") + "\n" + "Metodo de pago : " + requestMap.get("paymenthMethod");
+
+                Document document = new Document();
+                PdfWriter.getInstance(document, new FileOutputStream(FacturaConstantes.STORE_LOCATION + "\\" + fileName + ".pdf"));
+
+                document.open();
+                setRectangleInPdf(document);
+
+                Paragraph paragraphHeader = new Paragraph("Gestion de categorias y productos", getFont("Header"));
+                paragraphHeader.setAlignment(Element.ALIGN_CENTER);
+                document.add(paragraphHeader);
+
+                PdfPTable pdfTable = new PdfPTable(5);
+                pdfTable.setWidthPercentage(100);
+                addTableHeader(pdfTable);
+
+                JSONArray jsonArray = FacturaUtils.getJsonArrayFromString((String)requestMap.get("productDetails"));
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    addRows(pdfTable, FacturaUtils.getMapFromJson(jsonArray.toString(i)));
+                }
+                document.add(pdfTable);
+
+                Paragraph footer = new Paragraph("Total : " + requestMap.get("total") + "\n" +
+                        "Gracias por visitarnos, vuelva pronto", getFont("Data"));
+                document.add(footer);
+
+                document.close();
+
+                return new ResponseEntity<>("{\"uuid\":\""+fileName+"\"}", HttpStatus.OK);
+            }
+            return FacturaUtils.getResponseentity("Datos requeridos no encontrados", HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return FacturaUtils.getResponseentity(FacturaConstantes.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private void insertInvoice(Map<String, Object> requestMap) {
